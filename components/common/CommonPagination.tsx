@@ -7,24 +7,57 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
-export function CommonPagination() {
+type CommonPaginationProps = {
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  totalPages?: number;
+};
+
+export function CommonPagination({
+  currentPage = 1,
+  onPageChange = () => {},
+  totalPages = 5,
+}: Partial<CommonPaginationProps>) {
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+
   return (
     <Pagination>
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious href="#" />
+          <PaginationPrevious
+            href="#"
+            aria-disabled={currentPage === 1}
+            onClick={(event) => {
+              event.preventDefault();
+              if (currentPage > 1) onPageChange(currentPage - 1);
+            }}
+          />
         </PaginationItem>
 
-        {[1, 2, 3, 4, 5].map((page) => (
+        {pages.map((page) => (
           <PaginationItem key={page}>
-            <PaginationLink href="#" isActive={page === 3}>
+            <PaginationLink
+              href="#"
+              isActive={page === currentPage}
+              onClick={(event) => {
+                event.preventDefault();
+                onPageChange(page);
+              }}
+            >
               {page}
             </PaginationLink>
           </PaginationItem>
         ))}
 
         <PaginationItem>
-          <PaginationNext href="#" />
+          <PaginationNext
+            href="#"
+            aria-disabled={currentPage === totalPages}
+            onClick={(event) => {
+              event.preventDefault();
+              if (currentPage < totalPages) onPageChange(currentPage + 1);
+            }}
+          />
         </PaginationItem>
       </PaginationContent>
     </Pagination>
