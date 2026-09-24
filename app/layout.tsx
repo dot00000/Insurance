@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/common/Sidebar";
+import Header from "@/components/common/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <SidebarProvider style={{ "--sidebar-width": "340px" } as React.CSSProperties}>
             <AppSidebar />
             <div className="min-h-svh flex-1">
-              <SidebarTrigger />
+              <Header />
               {children}
             </div>
           </SidebarProvider>
