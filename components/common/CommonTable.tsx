@@ -41,15 +41,16 @@ const defaultColumns: CommonTableColumn[] = [
 ];
 
 type CommonTableProps = {
+  name: string;
   columns?: CommonTableColumn[];
   rows?: CommonTableRow[];
 };
 
-export default function CommonTable({ columns = defaultColumns, rows = defaultRows }: CommonTableProps) {
+export default function CommonTable({ name, columns = defaultColumns, rows = defaultRows }: CommonTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-        <h2 className="text-sm font-semibold text-slate-700">Table</h2>
+        <h2 className="text-sm font-semibold text-slate-700 text-bold">{name}</h2>
       </div>
 
       <UiTable className="w-full text-left">
