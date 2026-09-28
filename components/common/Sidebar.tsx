@@ -2,15 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LogOut,
-} from "lucide-react";
-
 import { navigation } from "@/constants/navigation";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -31,7 +26,7 @@ export function AppSidebar() {
             </svg>
           </span>
           <span className="whitespace-nowrap text-[20px] font-bold tracking-[-0.04em] text-[#53687b]">
-            다이렉트보험
+            보험다이렉트
           </span>
         </Link>
       </SidebarHeader>
@@ -63,16 +58,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter className="px-[25px] pb-[33px] pt-4">
-        <button
-          type="button"
-          className="flex h-[51px] w-full items-center gap-[18px] rounded-[5px] bg-[#63798c] px-[19px] text-left text-[16px] font-semibold text-white transition-colors hover:bg-[#526a7e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0873d1]"
-        >
-          <LogOut className="size-[20px]" strokeWidth={2.7} aria-hidden="true" />
-          <span>로그아웃</span>
-        </button>
-      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -1,3 +1,4 @@
 allowBuilds:
   msw: true
+  pnpm: true
   unrs-resolver: false
