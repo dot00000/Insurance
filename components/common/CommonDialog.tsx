@@ -39,9 +39,9 @@ export default function CommonDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
         <DialogHeader className="space-y-2">
-          <DialogTitle className="text-lg mb-2 font-semibold text-slate-900">{title}</DialogTitle>
+          <DialogTitle className="text-lg mb-2 font-semibold text-slate-900 px-3">{title}</DialogTitle>
           {description && (
-            <div className="flex items-center gap-3 text-sm text-slate-500">
+            <div className="flex items-center gap-3 text-sm text-slate-500 px-3">
               {descriptionImage && (
                 <Image
                   src={descriptionImage}
@@ -56,7 +56,7 @@ export default function CommonDialog({
           )}
         </DialogHeader>
 
-        <dl className="grid max-h-[60vh] grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-x-4 gap-y-3 overflow-y-auto py-2">
+        <dl className="grid max-h-[60vh] px-3 grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-x-4 gap-y-3 overflow-y-auto py-2">
           {details.map((detail) => (
             <React.Fragment key={detail.label}>
               <dt className="text-sm text-slate-500">{detail.label}</dt>

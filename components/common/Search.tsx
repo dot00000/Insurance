@@ -12,7 +12,7 @@ export default function Search({
   placeholder = "검색어를 입력하세요",
 }: SearchProps) {
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-xs">
       <label htmlFor="insurance-search" className="sr-only">
         검색
       </label>

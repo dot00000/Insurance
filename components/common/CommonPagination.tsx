@@ -18,7 +18,13 @@ export function CommonPagination({
   onPageChange = () => {},
   totalPages = 5,
 }: Partial<CommonPaginationProps>) {
-  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+  const pageWindowSize = 5;
+  const firstPage = Math.floor((currentPage - 1) / pageWindowSize) * pageWindowSize + 1;
+  const lastPage = Math.min(firstPage + pageWindowSize - 1, totalPages);
+  const pages = Array.from(
+    { length: Math.max(0, lastPage - firstPage + 1) },
+    (_, index) => firstPage + index,
+  );
 
   return (
     <Pagination>

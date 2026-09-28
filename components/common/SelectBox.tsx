@@ -28,7 +28,7 @@ export default function SelectBox({
   const selectedItem = items.find((item) => item.value === name);
 
   return (
-    <div className="w-full max-w-56">
+    <div className="w-full max-w-42">
       <label htmlFor="insurance-filter" className="sr-only">
         보험 유형 선택
       </label>
