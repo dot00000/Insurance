@@ -1,0 +1,25 @@
+"use client";
+
+import type { CSSProperties, ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { AppSidebar } from "@/components/common/Sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import Header from "@/components/common/Header";
+
+export default function AppFrame({ children }: Readonly<{ children: ReactNode }>) {
+  const pathname = usePathname();
+
+  if (pathname === "/login") {
+    return children;
+  }
+
+  return (
+    <SidebarProvider style={{ "--sidebar-width": "340px" } as CSSProperties}>
+      <AppSidebar />
+      <div className="min-h-svh flex-1">
+        <Header />
+        {children}
+      </div>
+    </SidebarProvider>
+  );
+}

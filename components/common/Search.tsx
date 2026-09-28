@@ -1,6 +1,16 @@
 import { Search as SearchIcon } from "lucide-react";
 
-export default function Search() {
+type SearchProps = {
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+};
+
+export default function Search({
+  value = "",
+  onChange,
+  placeholder = "검색어를 입력하세요",
+}: SearchProps) {
   return (
     <div className="w-full max-w-md">
       <label htmlFor="insurance-search" className="sr-only">
@@ -12,7 +22,9 @@ export default function Search() {
         <input
           id="insurance-search"
           type="search"
-          placeholder="검색어를 입력하세요"
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
+          placeholder={placeholder}
           className="w-full border-0 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
         />
       </div>

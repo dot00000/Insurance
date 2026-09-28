@@ -22,7 +22,11 @@ function getFullAge(birthDate: Date) {
   return age;
 }
 
-export function CommonCalendar() {
+type CommonCalendarProps = {
+  onAgeChange?: (age: number) => void;
+};
+
+export function CommonCalendar({ onAgeChange }: CommonCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,15 +51,15 @@ export function CommonCalendar() {
 
   return (
     <div className="flex items-center gap-2" ref={containerRef}>
-      <div className="relative w-full max-w-56">
+      <div className="relative h-[42px] w-[120px]">
         <button
           type="button"
-          aria-label="생년월일 선택"
+          aria-label="생년월일"
           aria-expanded={isOpen}
           onClick={() => setIsOpen((open) => !open)}
-          className="flex h-[42px] w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-700 shadow-sm transition-colors hover:border-slate-300 focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100"
+          className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-700 shadow-sm transition-colors hover:border-slate-300 focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100"
         >
-          <span>{selectedDate ? formatDate(selectedDate) : "생년월일 선택"}</span>
+          <span>{selectedDate ? formatDate(selectedDate) : "생년월일"}</span>
           <CalendarDays className="size-4 shrink-0 text-slate-500" strokeWidth={2} aria-hidden="true" />
         </button>
         {isOpen && (
@@ -71,6 +75,7 @@ export function CommonCalendar() {
               onSelect={(date) => {
                 if (date) {
                   setSelectedDate(date);
+                  onAgeChange?.(getFullAge(date));
                   setIsOpen(false);
                 }
               }}
@@ -81,7 +86,7 @@ export function CommonCalendar() {
       </div>
       {selectedDate && (
         <span className="whitespace-nowrap text-sm text-slate-600">
-          (보험나이 만 {getFullAge(selectedDate)}세)
+          (만 {getFullAge(selectedDate)}세)
         </span>
       )}
     </div>
