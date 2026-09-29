@@ -27,8 +27,7 @@
             "coverageRate": "80%",
             "annualLimit": "10000000",
             "deductible": "5만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-NH",
@@ -47,8 +46,7 @@
             "coverageRate": "90%",
             "annualLimit": "3000000",
             "deductible": "5만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-HEUNGKUK",
@@ -67,8 +65,7 @@
             "coverageRate": "70%",
             "annualLimit": "15000000",
             "deductible": "1만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-HYUNDAI",
@@ -87,8 +84,7 @@
             "coverageRate": "70%",
             "annualLimit": "20000000",
             "deductible": "5만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-SAMSUNG",
@@ -107,8 +103,7 @@
             "coverageRate": "90%",
             "annualLimit": "20000000",
             "deductible": "3만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-MERITZ",
@@ -127,8 +122,7 @@
             "coverageRate": "80%",
             "annualLimit": "3000000",
             "deductible": "5만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-DB",
@@ -147,8 +141,7 @@
             "coverageRate": "80%",
             "annualLimit": "5000000",
             "deductible": "5만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-HANWHA",
@@ -167,8 +160,7 @@
             "coverageRate": "80%",
             "annualLimit": "15000000",
             "deductible": "1만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           },
           {
             "cmpyCd": "MOCK-LOTTE",
@@ -187,8 +179,7 @@
             "coverageRate": "90%",
             "annualLimit": "5000000",
             "deductible": "5만원",
-            "enrollmentAgeRange": "생후 2개월~만 10세",
-            "premiumUnit": "원/월"
+            "enrollmentAgeRange": "생후 2개월~만 10세"
           }
         ]
       }

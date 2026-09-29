@@ -12,17 +12,39 @@ import {
 import { filterImages } from "@/utils/filterImages";
 import type { ReactNode } from "react";
 
-type CommonDialogProps = {
+type CommonDialogBaseProps = {
   title?: string;
   description?: string;
-  details: { label: string; value: ReactNode }[];
+  content?: ReactNode;
+  details?: { label: string; value: ReactNode }[];
   onClose?: () => void;
 };
+
+type CommonDialogProps = CommonDialogBaseProps &
+  (
+    | {
+        actionMode?: "close";
+        onConfirm?: never;
+        cancelLabel?: never;
+        confirmLabel?: never;
+      }
+    | {
+        actionMode: "confirm";
+        onConfirm: () => void;
+        cancelLabel?: string;
+        confirmLabel?: string;
+      }
+  );
 
 export default function CommonDialog({
   title = "보험 정보",
   description = "선택한 보험 상품의 상세 정보입니다.",
-  details,
+  content,
+  details = [],
+  actionMode = "close",
+  onConfirm,
+  cancelLabel = "취소",
+  confirmLabel = "확인",
   onClose,
 }: CommonDialogProps) {
   const [open, setOpen] = React.useState(true);
@@ -56,19 +78,48 @@ export default function CommonDialog({
           )}
         </DialogHeader>
 
-        <dl className="grid max-h-[60vh] px-3 grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-x-4 gap-y-3 overflow-y-auto py-2">
-          {details.map((detail) => (
-            <React.Fragment key={detail.label}>
-              <dt className="text-sm text-slate-500">{detail.label}</dt>
-              <dd className="break-words text-right text-sm font-medium text-slate-800">
-                {detail.value || "-"}
-              </dd>
-            </React.Fragment>
-          ))}
-        </dl>
+        {content ? (
+          <div className="px-3 py-2 text-sm leading-6 text-slate-700">{content}</div>
+        ) : (
+          <dl className="grid max-h-[60vh] px-3 grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-x-4 gap-y-3 overflow-y-auto py-2">
+            {details.map((detail) => (
+              <React.Fragment key={detail.label}>
+                <dt className="text-sm text-slate-500">{detail.label}</dt>
+                <dd className="break-words text-right text-sm font-medium text-slate-800">
+                  {detail.value || "-"}
+                </dd>
+              </React.Fragment>
+            ))}
+          </dl>
+        )}
 
         <DialogFooter className="mt-2 border-t border-slate-200 pt-4">
-          <DialogClose render={<Button variant="outline" className="h-[42px] rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50" onClick={onClose}>닫기</Button>} />
+            {actionMode === "confirm" ? (
+              <>
+                <DialogClose
+                  render={
+                    <Button
+                      variant="outline"
+                      className="h-[42px] w-[80px] font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#2196F3] hover:text-white"
+                    >
+                      {cancelLabel}
+                    </Button>
+                  }
+                />
+                <DialogClose render={<Button className="ml-3 h-[42px] w-[80px] rounded-xl border-slate-200 font-bold bg-white text-slate-700 hover:bg-[#2196F3] hover:text-white" onClick={onConfirm}>{confirmLabel}</Button>} />
+              </>
+            ) : (
+              <DialogClose
+                render={
+                  <Button
+                    variant="outline"
+                    className="h-[42px] w-[80px] font-bold rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#2196F3] hover:text-white"
+                  >
+                    닫기
+                  </Button>
+                }
+              />
+            )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

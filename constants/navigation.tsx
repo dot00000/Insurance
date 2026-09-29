@@ -7,7 +7,6 @@ import {
 	Luggage,
 	PawPrint,
 	PiggyBank,
-	Settings,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -26,6 +25,5 @@ export const navigation: NavigationItem[] = [
 	{ url: "/travel", name: "여행보험", icon: Luggage },
 	{ url: "/pet", name: "반려동물보험", icon: PawPrint },
 	{ url: "/notice", name: "공지사항", icon: Bell },
-	{ url: "/setting", name: "설정", icon: Settings },
 
 ];
