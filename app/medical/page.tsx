@@ -9,6 +9,7 @@ import Search from "@/components/common/Search";
 import SelectBox from "@/components/common/SelectBox";
 import type { MedicalInsuranceItem } from "@/api/medical/medical.type";
 import { createFilterItems } from "@/utils/filterItems";
+import { formatRate } from "@/utils/insuranceFormat";
 import { useState } from "react";
 
 const detailLabels: Record<string, string> = {
@@ -34,19 +35,14 @@ export default function Page() {
   const [selectedItem, setSelectedItem] = useState<MedicalInsuranceItem | null>(null);
   const { data, isLoading, isError } = useMedicalInsuranceQuery(pageNo);
   const items = data?.items ?? [];
-  const formatRate = (value: number | string | null | undefined) =>
-    value === null || value === undefined
-      ? "-"
-      : Number(value).toLocaleString();
-
   const columns = [
     { key: "id", label: "번호" },
     { key: "cmpyNm", label: "회사명" },
-    { key: "ptrn", label: "유형" },
-    { key: "mlInsRt", label: "남성 보험료율" },
-    { key: "fmlInsRt", label: "여성 보험료율" },
-    { key: "age", label: "(만) 나이" },
     { key: "prdNm", label: "상품명" },
+    { key: "age", label: "(만) 나이" },
+    { key: "mlInsRt", label: "남성 보험료 (원)" },
+    { key: "fmlInsRt", label: "여성 보험료 (원)" },
+    { key: "ptrn", label: "유형" },
   ];
 
   const rows = items.map((item, id) => ({
