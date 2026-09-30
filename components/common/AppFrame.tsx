@@ -11,6 +11,8 @@ export default function AppFrame({ children }: Readonly<{ children: ReactNode }>
 
   if (pathname === "/login") {
     return children;
+  } else if (pathname === "/signup" || pathname === "/reset-password") {
+    return children;
   }
 
   return (
