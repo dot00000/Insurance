@@ -1,18 +1,37 @@
 "use client";
 
 import noticeData from "@/data/notice.json";
-import CommonDialog from "@/components/common/CommonDialog";
 import { CommonPagination } from "@/components/common/CommonPagination";
 import CommonTable from "@/components/common/CommonTable";
 import { useState } from "react";
 import NoticeDialog from "@/components/common/NoticeDialog";
+import NoticeRegisterDialog, { type NoticeDraft } from "@/components/common/NoticeRegisterDialog";
+import { Button } from "@/components/ui/button";
 
 const notices = noticeData.response.body.items.item;
 const rowsPerPage = 10;
+type NoticeRecord = (typeof notices)[number] & { attachmentName?: string | null };
 
 export default function Page() {
   const [pageNo, setPageNo] = useState(1);
-  const [selectedNotice, setSelectedNotice] = useState<(typeof notices)[number] | null>(null);
+  const [noticeItems, setNoticeItems] = useState<NoticeRecord[]>(notices);
+  const [selectedNotice, setSelectedNotice] = useState<NoticeRecord | null>(null);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
+  function registerNotice(draft: NoticeDraft) {
+    const newNotice: NoticeRecord = {
+      id: noticeItems.reduce((maxId, notice) => Math.max(maxId, notice.id), 0) + 1,
+      title: draft.title,
+      author: "관리자",
+      date: draft.date,
+      content: draft.content,
+      attachmentName: draft.attachmentName,
+    };
+
+    setNoticeItems((current) => [newNotice, ...current]);
+    setPageNo(1);
+    setIsRegisterOpen(false);
+  }
 
   const columns = [
     { key: "id", label: "번호", headerClassName: "w-20" },
@@ -21,7 +40,7 @@ export default function Page() {
     { key: "date", label: "등록일", headerClassName: "w-36" },
   ];
 
-  const rows = notices.map(({ id, title, author, date }) => ({
+  const rows = noticeItems.map(({ id, title, author, date }) => ({
     id,
     title,
     author,
@@ -32,12 +51,22 @@ export default function Page() {
 
   return (
     <div className="space-y-4 p-6">
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 rounded-sm border-slate-400 px-6 text-sm font-medium text-slate-900 shadow-none hover:bg-[#2196F3] hover:text-white"
+          onClick={() => setIsRegisterOpen(true)}
+        >
+          공지사항 등록
+        </Button>
+      </div>
       <CommonTable
         name="공지사항"
         columns={columns}
         rows={visibleRows}
         onRowClick={(row) => {
-          const notice = notices.find((item) => item.id === Number(row.id));
+          const notice = noticeItems.find((item) => item.id === Number(row.id));
           if (notice) setSelectedNotice(notice);
         }}
       />
@@ -50,11 +79,16 @@ export default function Page() {
             { label: "작성자", value: selectedNotice.author },
             { label: "등록일", value: selectedNotice.date },
             { label: "내용", value: selectedNotice.content },
-            { label: "첨부파일", value: selectedNotice.author}
+            { label: "첨부파일", value: selectedNotice.attachmentName ?? "첨부 없음" },
           ]}
           onClose={() => setSelectedNotice(null)}
         />
       )}
+      <NoticeRegisterDialog
+        open={isRegisterOpen}
+        onOpenChange={setIsRegisterOpen}
+        onSubmit={registerNotice}
+      />
       <CommonPagination
         currentPage={pageNo}
         onPageChange={setPageNo}
