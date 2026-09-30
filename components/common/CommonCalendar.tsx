@@ -11,23 +11,46 @@ function formatDate(date: Date) {
 }
 
 function getFullAge(birthDate: Date) {
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  if (
-    today.getMonth() < birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
-  ) {
-    age -= 1;
-  }
-  return age;
+  return dayjs().diff(dayjs(birthDate), "year");
 }
 
 type CommonCalendarProps = {
   onAgeChange?: (age: number) => void;
+  onDateChange?: (date: Date) => void;
+  value?: Date | null;
+  initialDate?: Date;
+  label?: string;
+  showAge?: boolean;
+  isInvalid?: boolean;
+  ariaDescribedBy?: string;
+  minDate?: Date;
+  maxDate?: Date;
+  disableFuture?: boolean;
+  wrapperClassName?: string;
+  buttonHeightClassName?: string;
+  buttonWidthClassName?: string;
+  buttonClassName?: string;
 };
 
-export function CommonCalendar({ onAgeChange }: CommonCalendarProps) {
-  const [selectedDate, setSelectedDate] = useState<Date>();
+export function CommonCalendar({
+  onAgeChange,
+  onDateChange,
+  value,
+  initialDate,
+  label = "생년월일",
+  showAge = true,
+  isInvalid = false,
+  ariaDescribedBy,
+  minDate,
+  maxDate,
+  disableFuture = true,
+  wrapperClassName = "",
+  buttonHeightClassName = "h-[42px]",
+  buttonWidthClassName = "w-[120px]",
+  buttonClassName = "",
+}: CommonCalendarProps) {
+  const [internalSelectedDate, setInternalSelectedDate] = useState<Date | undefined>(() => initialDate);
+  const selectedDate = value === undefined ? internalSelectedDate : value ?? undefined;
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -50,16 +73,17 @@ export function CommonCalendar({ onAgeChange }: CommonCalendarProps) {
   }, [isOpen]);
 
   return (
-    <div className="flex items-center gap-2" ref={containerRef}>
-      <div className="relative h-[42px] w-[120px]">
+    <div className={`flex items-center gap-2 ${wrapperClassName}`} ref={containerRef}>
+      <div className={`relative ${buttonHeightClassName} ${buttonWidthClassName}`}>
         <button
           type="button"
-          aria-label="생년월일"
+          aria-label={label}
           aria-expanded={isOpen}
+          aria-describedby={ariaDescribedBy}
           onClick={() => setIsOpen((open) => !open)}
-          className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-700 shadow-sm transition-colors hover:border-slate-300 focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100"
+          className={`flex h-full w-full items-center justify-between rounded-xl border bg-white px-3 py-2.5 text-left text-sm text-slate-700 shadow-sm transition-colors hover:border-slate-300 focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100 ${isInvalid ? 'border-[#c4483d]' : 'border-slate-200'} ${buttonClassName}`}
         >
-          <span>{selectedDate ? formatDate(selectedDate) : "생년월일"}</span>
+          <span>{selectedDate ? formatDate(selectedDate) : label}</span>
           <CalendarDays className="size-4 shrink-0 text-slate-500" strokeWidth={2} aria-hidden="true" />
         </button>
         {isOpen && (
@@ -67,15 +91,20 @@ export function CommonCalendar({ onAgeChange }: CommonCalendarProps) {
             <Calendar
               mode="single"
               captionLayout="dropdown"
-              startMonth={new Date(1900, 0)}
-              endMonth={new Date()}
-              disabled={{ after: new Date() }}
+              startMonth={minDate ?? dayjs("1900-01-01").toDate()}
+              endMonth={maxDate ?? (disableFuture ? dayjs().toDate() : dayjs().add(10, "year").toDate())}
+              disabled={(date) => (
+                (minDate !== undefined && dayjs(date).isBefore(dayjs(minDate), "day")) ||
+                (maxDate !== undefined && dayjs(date).isAfter(dayjs(maxDate), "day")) ||
+                (disableFuture && maxDate === undefined && dayjs(date).isAfter(dayjs(), "day"))
+              )}
               selected={selectedDate}
               defaultMonth={selectedDate}
               onSelect={(date) => {
                 if (date) {
-                  setSelectedDate(date);
+                  if (value === undefined) setInternalSelectedDate(date);
                   onAgeChange?.(getFullAge(date));
+                  onDateChange?.(date);
                   setIsOpen(false);
                 }
               }}
@@ -84,7 +113,7 @@ export function CommonCalendar({ onAgeChange }: CommonCalendarProps) {
           </div>
         )}
       </div>
-      {selectedDate && (
+      {showAge && selectedDate && (
         <span className="whitespace-nowrap text-sm text-slate-600">
           (만 {getFullAge(selectedDate)}세)
         </span>

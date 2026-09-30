@@ -5,9 +5,10 @@ import type { MedicalInsuranceResult } from "./medical.type";
 
 export const medicalInsuranceQueryKey = (pageNo: number) => ["medical-insurance", pageNo] as const;
 
-export function useMedicalInsuranceQuery(pageNo: number) {
+export function useMedicalInsuranceQuery(pageNo: number, enabled = true) {
 	return useQuery<MedicalInsuranceResult, Error>({
 		queryKey: medicalInsuranceQueryKey(pageNo),
+		enabled,
 		queryFn: async () => {
 			const response = await fetch(`/api/medical?pageNo=${pageNo}`);
 

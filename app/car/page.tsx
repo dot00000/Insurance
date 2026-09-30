@@ -58,6 +58,7 @@ export default function Page() {
 
   const rows = items.map((item, index) => ({
     ...item,
+    plans: undefined, // 플랜 객체는 테이블 셀에 표시하지 않습니다.
     id: index,
     mlInsRt: formatAmount(item.mlInsRt),
     fmlInsRt: formatAmount(item.fmlInsRt),
@@ -96,7 +97,7 @@ export default function Page() {
 
   const selectedDetails = selectedItem
     ? Object.entries(selectedItem)
-        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .filter(([key, value]) => key !== "plans" && value !== undefined && value !== null && value !== "")
         .map(([key, value]) => ({
           label: detailLabels[key] ?? key,
           value: currencyFields.has(key)

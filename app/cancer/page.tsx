@@ -48,6 +48,7 @@ export default function Page() {
 
   const rows = items.map((item, index) => ({
     ...item,
+    plans: undefined, // 플랜 객체는 테이블 셀에 표시하지 않습니다.
     id: index,
     ptrn: item.ptrn,
     mog: item.mog,
@@ -76,12 +77,12 @@ export default function Page() {
   );
   const selectedDetails = selectedItem
     ? Object.entries(selectedItem)
-        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .filter(([key, value]) => key !== "plans" && value !== undefined && value !== null && value !== "")
         .map(([key, value]) => ({
           label: detailLabels[key] ?? key,
           value:
             key === "mlInsRt" || key === "fmlInsRt"
-              ? formatRate(value)
+              ? formatRate(typeof value === "string" ? value : undefined)
               : String(value),
         }))
     : [];

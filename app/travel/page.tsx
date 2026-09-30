@@ -7,12 +7,10 @@ import { CommonPagination } from "@/components/common/CommonPagination";
 import CommonTable from "@/components/common/CommonTable";
 import Search from "@/components/common/Search";
 import SelectBox from "@/components/common/SelectBox";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { createFilterItems } from "@/utils/filterItems";
 import { formatAmount } from "@/utils/insuranceFormat";
-import { Plus, X } from "lucide-react";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { X } from "lucide-react";
+import { useState, type FormEvent} from "react";
 
 const items = travelInsurance.response.body.items.item;
 const rowsPerPage = 10;
@@ -69,7 +67,6 @@ export default function Page() {
   const [error, setError] = useState("");
   const [selectedItem, setSelectedItem] = useState<(typeof items)[number] | null>(null);
 
-  const maxTripDays = tripType === "국내" ? 30 : 90;
   const companyOptions = createFilterItems(
     items.map((item) => item.cmpyNm),
     "전체 회사",
@@ -82,33 +79,6 @@ export default function Page() {
     items.map((item) => item.tripPurpose),
     "전체 여행 목적",
   );
-
-  function addDestinations(value = destinationInput) {
-    const parsed = parseDestinations(value);
-    if (parsed.length === 0) return;
-
-    setDestinations((current) => {
-      const seen = new Set(current.map((destination) => destination.toLocaleLowerCase()));
-      return [
-        ...current,
-        ...parsed.filter((destination) => {
-          const normalized = destination.toLocaleLowerCase();
-          if (seen.has(normalized)) return false;
-          seen.add(normalized);
-          return true;
-        }),
-      ];
-    });
-    setDestinationInput("");
-    setError("");
-  }
-
-  function handleDestinationKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter" || event.key === ",") {
-      event.preventDefault();
-      addDestinations();
-    }
-  }
 
   function handleQuoteSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -138,6 +108,7 @@ export default function Page() {
 
     return {
       ...item,
+      plans: undefined, // 플랜 객체는 테이블 셀에 표시하지 않습니다.
       id: index,
       age: item.age,
       basePremium: formatAmount(item.basePremium),
@@ -182,7 +153,7 @@ export default function Page() {
             (quoteRequest?.tripDays ?? Number(selectedItem.tripDays)),
         ),
       })
-        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .filter(([key, value]) => key !== "plans" && value !== undefined && value !== null && value !== "")
         .map(([key, value]) => ({
           label:
             key === "destinations"

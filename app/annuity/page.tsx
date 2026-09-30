@@ -67,6 +67,7 @@ export default function Page() {
 
   const rows = items.map((item, index) => ({
     ...item,
+    plans: undefined, // 플랜 객체는 테이블 셀에 표시하지 않습니다.
     id: index,
     basePremium: formatAmount(item.basePremium),
     ageSurcharge: formatAmount(item.ageSurcharge),
@@ -95,7 +96,7 @@ export default function Page() {
 
   const selectedDetails = selectedItem
     ? Object.entries(selectedItem)
-        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .filter(([key, value]) => key !== "plans" && value !== undefined && value !== null && value !== "")
         .map(([key, value]) => ({
           label: detailLabels[key] ?? key,
           value: currencyFields.has(key)

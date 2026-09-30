@@ -16,7 +16,7 @@ export default function AppFrame({ children }: Readonly<{ children: ReactNode }>
   return (
     <SidebarProvider style={{ "--sidebar-width": "340px" } as CSSProperties}>
       <AppSidebar />
-      <div className="min-h-svh flex-1">
+      <div className="min-h-svh min-w-0 flex-1 bg-[#f5f7fa]">
         <Header />
         {children}
       </div>
