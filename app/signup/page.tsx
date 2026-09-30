@@ -36,7 +36,7 @@ export default function SignupPage() {
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
-      username: "", password: "", passwordConfirm: "", name: "", email: "", phone: "",
+       password: "", passwordConfirm: "", name: "", email: "", phone: "",
     },
   });
   const submitting = useRef(false);
@@ -58,11 +58,11 @@ export default function SignupPage() {
           submitting.current = true;
           try {
             const supabase = getSupabaseClient();
-            const { email, password, username, name, phone } = values;
+            const { email, password, name, phone } = values;
             const { data, error } = await supabase.auth.signUp({
               email,
               password,
-              options: { data: { username, name, phone } },
+              options: { data: { name, phone } },
             });
 
             if (error) {
