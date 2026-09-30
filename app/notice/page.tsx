@@ -5,6 +5,7 @@ import CommonTable from "@/components/common/CommonTable";
 import { useEffect, useState } from "react";
 import NoticeDialog from "@/components/common/NoticeDialog";
 import NoticeRegisterDialog from "@/components/common/NoticeRegisterDialog";
+import NoticeEditDialog from "@/components/common/NoticeEditDialog";
 import { Button } from "@/components/ui/button";
 import { getSupabaseClient } from "@/utils/supabase/client";
 
@@ -15,6 +16,8 @@ type NoticeRecord = {
   title: string;
   content: string;
   attachment_path: string | null;
+  author_id: string | null;
+  username: string | null;
 };
 
 export default function Page() {
@@ -25,11 +28,15 @@ export default function Page() {
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord | null>(null);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [editingNotice, setEditingNotice] = useState<NoticeRecord | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = getSupabaseClient().auth.onAuthStateChange((_event, session) => {
+    const supabase = getSupabaseClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(Boolean(session));
+      setCurrentUserId(session?.user.id ?? null);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -38,9 +45,10 @@ export default function Page() {
     let active = true;
     async function loadNotices() {
       try {
-        const { data, count, error } = await getSupabaseClient()
+        const supabase = getSupabaseClient();
+        const { data, count, error } = await supabase
           .from("notices")
-          .select("id, notice_date, title, content, attachment_path", { count: "exact" })
+          .select("id, notice_date, title, content, attachment_path, author_id", { count: "exact" })
           .order("id", { ascending: false })
           .range((pageNo - 1) * rowsPerPage, pageNo * rowsPerPage - 1);
         if (!active) return;
@@ -48,7 +56,24 @@ export default function Page() {
           setListError("공지사항을 불러오지 못했습니다.");
           return;
         }
-        setNoticeItems(data ?? []);
+        const authorIds = [...new Set((data ?? []).map((notice) => notice.author_id).filter((id): id is string => Boolean(id)))];
+        let usernames = new Map<string, string>();
+        if (authorIds.length > 0) {
+          const { data: profiles, error: profileError } = await supabase
+            .from("profiles")
+            .select("id, username")
+            .in("id", authorIds);
+          if (!active) return;
+          if (profileError) {
+            setListError("작성자 정보를 불러오지 못했습니다.");
+            return;
+          }
+          usernames = new Map((profiles ?? []).map((profile) => [profile.id, profile.username]));
+        }
+        setNoticeItems((data ?? []).map((notice) => ({
+          ...notice,
+          username: notice.author_id ? usernames.get(notice.author_id) ?? null : null,
+        })));
         setTotalCount(count ?? 0);
         setListError(null);
       } catch {
@@ -62,12 +87,14 @@ export default function Page() {
   const columns = [
     { key: "id", label: "번호", headerClassName: "w-20" },
     { key: "title", label: "제목" },
+    { key: "username", label: "작성자", headerClassName: "w-56" },
     { key: "notice_date", label: "등록일", headerClassName: "w-36" },
   ];
 
-  const rows = noticeItems.map(({ id, title, notice_date }) => ({
+  const rows = noticeItems.map(({ id, title, username, notice_date }) => ({
     id,
     title,
+    username: username ?? "-",
     notice_date,
   }));
   const totalPages = Math.ceil(totalCount / rowsPerPage);
@@ -97,10 +124,16 @@ export default function Page() {
       {selectedNotice && (
         <NoticeDialog
           title={selectedNotice.title}
+          canEdit={Boolean(currentUserId && selectedNotice.author_id === currentUserId)}
+          onEdit={() => {
+            setEditingNotice(selectedNotice);
+            setSelectedNotice(null);
+          }}
           description="보험 관련 공지사항"
           details={[
             { label: "번호", value: selectedNotice.id },
             { label: "등록일", value: selectedNotice.notice_date },
+            { label: "작성자", value: selectedNotice.username ?? "-" },
             { label: "내용", value: selectedNotice.content },
             { label: "첨부파일", value: selectedNotice.attachment_path ? (
               <a
@@ -125,6 +158,17 @@ export default function Page() {
           setIsRegisterOpen(false);
         }}
       />}
+      {editingNotice && (
+        <NoticeEditDialog
+          notice={editingNotice}
+          open={true}
+          onOpenChange={(open) => { if (!open) setEditingNotice(null); }}
+          onUpdated={() => {
+            setReloadKey((current) => current + 1);
+            setEditingNotice(null);
+          }}
+        />
+      )}
       <CommonPagination
         currentPage={pageNo}
         onPageChange={setPageNo}

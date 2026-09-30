@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { CommonCalendar } from "@/components/common/CommonCalendar";
 import {
@@ -14,10 +14,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { getSupabaseClient } from "@/utils/supabase/client";
 
-type NoticeRegisterDialogProps = {
+type NoticeEditDialogProps = {
+  notice: {
+    id: number;
+    author_id: string | null;
+    username: string | null;
+    notice_date: string;
+    title: string;
+    content: string;
+    attachment_path: string | null;
+  };
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated: () => void;
+  onUpdated: () => void;
 };
 
 function getToday() {
@@ -33,43 +42,18 @@ function formatLocalDate(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-export default function NoticeRegisterDialog({
+export default function NoticeEditDialog({
+  notice,
   open,
   onOpenChange,
-  onCreated,
-}: NoticeRegisterDialogProps) {
-  const [date, setDate] = useState(getToday);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  onUpdated,
+}: NoticeEditDialogProps) {
+  const [date, setDate] = useState(notice.notice_date || getToday());
+  const [title, setTitle] = useState(notice.title);
+  const [content, setContent] = useState(notice.content);
   const [attachment, setAttachment] = useState<File | null>(null);
-  const [fileInputKey, setFileInputKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [authorName, setAuthorName] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    let active = true;
-    async function loadAuthor() {
-      try {
-        const supabase = getSupabaseClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          if (active) setAuthorName("");
-          return;
-        }
-        const { data: profile } = await supabase.from("profiles")
-          .select("username")
-          .eq("id", user.id)
-          .single();
-        if (active) setAuthorName(profile?.username ?? "");
-      } catch {
-        if (active) setAuthorName("");
-      }
-    }
-    void loadAuthor();
-    return () => { active = false; };
-  }, [open]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,20 +64,12 @@ export default function NoticeRegisterDialog({
     try {
       const supabase = getSupabaseClient();
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        setSubmitError("공지사항을 등록하려면 로그인해 주세요.");
-        return;
-      }
-      const { data: profile, error: profileError } = await supabase.from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .single();
-      if (profileError || !profile?.username) {
-        setSubmitError("작성자 정보를 확인할 수 없습니다.");
+      if (userError || !user || user.id !== notice.author_id) {
+        setSubmitError("이 공지를 수정할 권한이 없습니다.");
         return;
       }
 
-      let attachmentPath: string | null = null;
+      let attachmentPath = notice.attachment_path;
       if (attachment) {
         const extension = attachment.name.split(".").pop()?.toLowerCase();
         const safeExtension = extension?.match(/^[a-z0-9]{1,10}$/) ? extension : "bin";
@@ -110,26 +86,20 @@ export default function NoticeRegisterDialog({
         attachmentPath = path;
       }
 
-      const { error: insertError } = await supabase.from("notices").insert({
+      const { data: updatedNotice, error: updateError } = await supabase.from("notices").update({
         notice_date: date,
         title: title.trim(),
         content: content.trim(),
         attachment_path: attachmentPath,
-        author_id: user.id,
-      });
-      if (insertError) {
-        setSubmitError("공지사항 저장에 실패했습니다. 테이블 컬럼과 등록 정책을 확인해 주세요.");
+      }).eq("id", notice.id).eq("author_id", user.id).select("id").single();
+      if (updateError || !updatedNotice) {
+        setSubmitError("공지사항 수정에 실패했습니다. 수정 권한과 테이블 정책을 확인해 주세요.");
         return;
       }
 
-      setTitle("");
-      setContent("");
-      setAttachment(null);
-      setFileInputKey((current) => current + 1);
-      setDate(getToday());
-      onCreated();
+      onUpdated();
     } catch {
-      setSubmitError("공지사항 등록 요청을 처리하지 못했습니다. 다시 시도해 주세요.");
+      setSubmitError("공지사항 수정 요청을 처리하지 못했습니다. 다시 시도해 주세요.");
     } finally {
       setIsSubmitting(false);
     }
@@ -142,7 +112,7 @@ export default function NoticeRegisterDialog({
       <DialogContent className="max-h-[95vh] gap-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-xl sm:max-w-5xl">
         <DialogHeader className="space-y-2 border-b border-slate-300 px-3 pb-4">
           <DialogTitle className="text-lg font-semibold text-slate-900">
-            공지사항 등록
+            공지사항 수정
           </DialogTitle>
         </DialogHeader>
 
@@ -150,7 +120,7 @@ export default function NoticeRegisterDialog({
           <div className="px-3">
             <div className="grid gap-3 border-b border-slate-200 py-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
               <label htmlFor="notice-author" className="text-sm font-medium text-slate-800">작성자</label>
-              <Input id="notice-author" value={authorName} readOnly aria-readonly="true" className="h-11 rounded-sm border-slate-300 bg-slate-100 px-4 text-sm text-slate-700 shadow-none" />
+              <Input id="notice-author" value={notice.username ?? ""} readOnly aria-readonly="true" className="h-11 rounded-sm border-slate-300 bg-slate-100 px-4 text-sm text-slate-700 shadow-none" />
             </div>
             <div className="grid gap-3 border-b border-slate-200 py-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
               <span className="text-sm font-medium text-slate-800">
@@ -201,12 +171,12 @@ export default function NoticeRegisterDialog({
               </label>
               <div className="flex flex-wrap items-center gap-3">
                 <Input
-                  key={fileInputKey}
                   id="notice-attachment"
                   type="file"
                   onChange={(event) => setAttachment(event.target.files?.[0] ?? null)}
                   className="h-11 max-w-md cursor-pointer rounded-sm border-slate-300 text-center file:mr-4 file:rounded-sm file:border-0 file:bg-[#2196F3] file:px-4 file: py-1 file:h-8 file:text-sm file:font-medium file:text-white"
                 />
+                {notice.attachment_path && <span className="text-sm text-slate-500">새 파일을 선택하지 않으면 기존 첨부파일이 유지됩니다.</span>}
               </div>
             </div>
           </div>
@@ -231,7 +201,7 @@ export default function NoticeRegisterDialog({
               disabled={isSubmitting}
               className="h-11 min-w-28 rounded-sm border border-slate-400 bg-white text-slate-900 shadow-none hover:bg-[#2196F3] hover:text-white"
             >
-              {isSubmitting ? "등록 중…" : "등록"}
+              {isSubmitting ? "수정 중…" : "수정"}
             </Button>
           </DialogFooter>
         </form>

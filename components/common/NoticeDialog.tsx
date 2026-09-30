@@ -16,6 +16,8 @@ type CommonDialogProps = {
   title?: string;
   description?: string;
   details: { label: string; value: ReactNode }[];
+  canEdit?: boolean;
+  onEdit?: () => void;
   onClose?: () => void;
 };
 
@@ -23,6 +25,8 @@ export default function NoticeDialog({
   title = "보험 정보",
   description = "선택한 보험 상품의 상세 정보입니다.",
   details,
+  canEdit = false,
+  onEdit,
   onClose,
 }: CommonDialogProps) {
   const [open, setOpen] = React.useState(true);
@@ -68,6 +72,7 @@ export default function NoticeDialog({
         </dl>
 
         <DialogFooter className="mt-2 border-t border-slate-200 pt-4">
+          {canEdit && onEdit && <Button variant="outline" className="h-[42px] w-[80px] rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#2196F3] hover:text-white" onClick={onEdit}>수정</Button>}
           <DialogClose render={<Button variant="outline" className="h-[42px] w-[80px] rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-[#2196F3] hover:text-white" onClick={onClose}>닫기</Button>} />
         </DialogFooter>
       </DialogContent>
