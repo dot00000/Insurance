@@ -67,7 +67,7 @@ export default function Page() {
 
   const rows = items.map((item, index) => ({
     ...item,
-    plans: undefined, // 플랜 객체는 테이블 셀에 표시하지 않는다.
+    plans: undefined, // 플랜 객체는 테이블 셀에 표시하지 않는다
     id: index,
     basePremium: formatAmount(item.basePremium),
     ageSurcharge: formatAmount(item.ageSurcharge),
