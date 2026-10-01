@@ -1,16 +1,23 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { getSupabaseClient } from "@/utils/supabase/client";
 import { passwordSchema } from "@/utils/signupValidation";
 
+type ResetPasswordValues = { password: string; passwordConfirm: string };
+
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const { register, handleSubmit, getValues, formState: { errors, isSubmitting } } = useForm<ResetPasswordValues>({
+    defaultValues: { password: "", passwordConfirm: "" },
+    mode: "onTouched",
+    reValidateMode: "onChange",
+  });
   const [recoveryReady, setRecoveryReady] = useState(false);
   const [checkingLink, setCheckingLink] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [complete, setComplete] = useState(false);
 
   useEffect(() => {
@@ -26,38 +33,20 @@ export default function ResetPasswordPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!recoveryReady || submitting) return;
-
-    const formData = new FormData(event.currentTarget);
-    const password = String(formData.get("password") ?? "");
-    const confirm = String(formData.get("password-confirm") ?? "");
-    const validation = passwordSchema.safeParse(password);
-    if (!validation.success) {
-      setError(validation.error.issues[0]?.message ?? "비밀번호를 확인해 주세요.");
-      return;
-    }
-    if (password !== confirm) {
-      setError("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-
-    setSubmitting(true);
-    setError(null);
+  async function submitPassword({ password }: ResetPasswordValues) {
+    if (!recoveryReady) return;
+    setSubmitError(null);
     try {
       const supabase = getSupabaseClient();
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) {
-        setError("비밀번호를 변경하지 못했습니다. 재설정 링크를 다시 요청해 주세요.");
+        setSubmitError("비밀번호를 변경하지 못했습니다. 재설정 링크를 다시 요청해 주세요.");
         return;
       }
       await supabase.auth.signOut({ scope: "local" });
       setComplete(true);
     } catch {
-      setError("비밀번호 변경 요청을 처리하지 못했습니다. 다시 시도해 주세요.");
-    } finally {
-      setSubmitting(false);
+      setSubmitError("비밀번호 변경 요청을 처리하지 못했습니다. 다시 시도해 주세요.");
     }
   }
 
@@ -73,18 +62,25 @@ export default function ResetPasswordPage() {
             <button className="h-11 w-full rounded-lg bg-[#2196F3] font-bold text-white" onClick={() => router.replace("/login")} type="button">로그인으로 이동</button>
           </div>
         ) : recoveryReady ? (
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4" noValidate onSubmit={handleSubmit(submitPassword, () => setSubmitError(null))}>
             <div>
               <label className="mb-1 block text-sm font-medium" htmlFor="new-password">새 비밀번호</label>
-              <input autoComplete="new-password" className="h-10 w-full rounded-lg border border-[#e8ebf0] px-3" id="new-password" name="password" required type="password" />
-              <p className="mt-1 text-xs text-[#697382]">8~64자, 영문 대문자·소문자·숫자·특수문자 각 1자 이상</p>
+              <input {...register("password", {
+                deps: ["passwordConfirm"],
+                validate: (value) => passwordSchema.safeParse(value).error?.issues[0]?.message ?? true,
+              })} autoComplete="new-password" aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? "password-help password-error" : "password-help"} className="h-10 w-full rounded-lg border border-[#e8ebf0] px-3" id="new-password" required type="password" />
+              <p id="password-help" className="mt-1 text-xs text-[#697382]">8~64자, 영문 대문자·소문자·숫자·특수문자 각 1자 이상</p>
+              {errors.password && <p id="password-error" role="alert" className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium" htmlFor="password-confirm">비밀번호 확인</label>
-              <input autoComplete="new-password" className="h-10 w-full rounded-lg border border-[#e8ebf0] px-3" id="password-confirm" name="password-confirm" required type="password" />
+              <input {...register("passwordConfirm", {
+                validate: (value) => !value ? "비밀번호 확인을 입력해 주세요." : value === getValues("password") || "비밀번호가 일치하지 않습니다.",
+              })} autoComplete="new-password" aria-invalid={Boolean(errors.passwordConfirm)} aria-describedby={errors.passwordConfirm ? "password-confirm-error" : undefined} className="h-10 w-full rounded-lg border border-[#e8ebf0] px-3" id="password-confirm" required type="password" />
+              {errors.passwordConfirm && <p id="password-confirm-error" role="alert" className="mt-1 text-xs text-red-600">{errors.passwordConfirm.message}</p>}
             </div>
-            {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-            <button className="h-11 w-full rounded-lg bg-[#2196F3] font-bold text-white disabled:opacity-60" disabled={submitting} type="submit">{submitting ? "변경 중…" : "비밀번호 변경"}</button>
+            {submitError && <p role="alert" className="text-sm text-red-600">{submitError}</p>}
+            <button className="h-11 w-full rounded-lg bg-[#2196F3] font-bold text-white disabled:opacity-60" disabled={isSubmitting} type="submit">{isSubmitting ? "변경 중…" : "비밀번호 변경"}</button>
           </form>
         ) : (
           <div className="space-y-4">

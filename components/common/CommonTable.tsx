@@ -18,27 +18,6 @@ export type CommonTableColumn = {
   render?: (value: ReactNode, row: CommonTableRow) => ReactNode;
 };
 
-const defaultRows: CommonTableRow[] = [
-  { id: "INV001", customer: "김민수", product: "종합보험", status: "가입중", amount: "₩250,000" },
-  { id: "INV002", customer: "박서연", product: "자동차보험", status: "만기예정", amount: "₩180,000" },
-  { id: "INV003", customer: "최준호", product: "여행보험", status: "갱신완료", amount: "₩96,000" },
-];
-
-const defaultColumns: CommonTableColumn[] = [
-  { key: "id", label: "번호", headerClassName: "w-[120px]", className: "font-medium text-slate-800" },
-  { key: "customer", label: "고객명" },
-  { key: "product", label: "상품" },
-  {
-    key: "status",
-    label: "상태",
-    render: (value) => (
-      <span className="inline-flex rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-700">
-        {value}
-      </span>
-    ),
-  },
-  { key: "amount", label: "월 보험료", headerClassName: "text-right", className: "text-right font-medium text-slate-800" },
-];
 
 type CommonTableProps = {
   name: string;
@@ -49,8 +28,8 @@ type CommonTableProps = {
 
 export default function CommonTable({
   name,
-  columns = defaultColumns,
-  rows = defaultRows,
+  columns = [],
+  rows = [],
   onRowClick,
 }: CommonTableProps) {
   return (
