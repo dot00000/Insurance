@@ -101,7 +101,7 @@ export default function LoginPage() {
           <input
             autoComplete="email"
             ref={emailInput}
-            className="h-10 w-full rounded-[8px] border border-[#e8ebf0] bg-white/70 px-3 text-base text-[#202735] outline-none transition placeholder:text-[#a0a8b4] focus:border-[#7ea5f8] focus:ring-2 focus:ring-[#3569e8]/10"
+            className="h-10 w-full rounded-xl border border-[#e8ebf0] bg-white/70 px-3 text-base text-[#202735] outline-none transition placeholder:text-[#a0a8b4] focus:border-[#7ea5f8] focus:ring-2 focus:ring-[#3569e8]/10"
             id="login-email"
             name="email"
             placeholder="이메일"
@@ -115,7 +115,7 @@ export default function LoginPage() {
           <div className="relative">
             <input
               autoComplete="current-password"
-              className="mt-2 h-10 w-full rounded-[8px] border border-[#e8ebf0] bg-white/70 px-3 pr-9 text-base text-[#202735] outline-none transition placeholder:text-[#a0a8b4] focus:border-[#7ea5f8] focus:ring-2 focus:ring-[#3569e8]/10"
+              className="mt-2 h-10 w-full rounded-xl border border-[#e8ebf0] bg-white/70 px-3 pr-9 text-base text-[#202735] outline-none transition placeholder:text-[#a0a8b4] focus:border-[#7ea5f8] focus:ring-2 focus:ring-[#3569e8]/10"
               id="login-password"
               name="password"
               placeholder="비밀번호"
@@ -155,7 +155,7 @@ export default function LoginPage() {
 
           <button
             disabled={isSubmitting}
-            className="mt-1 h-12 w-full font-bold rounded-[8px] bg-[#2196F3] text-base font-medium text-white shadow-[0_1px_2px_rgba(30,70,170,0.2)] transition hover:bg-[#285bd4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3268e8]"
+            className="mt-1 h-12 w-full font-bold rounded-xl bg-[#2196F3] text-base font-medium text-white shadow-[0_1px_2px_rgba(30,70,170,0.2)] transition hover:bg-[#285bd4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3268e8]"
             type="submit"
           >
             {isSubmitting ? "로그인 중…" : "로그인"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { CustomButton } from "@/components/common/CustomButton";
 import CommonDialog from "@/components/common/CommonDialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -195,7 +195,7 @@ export default function Page() {
               </label>
 
               <div>
-                <Input id={row.id} {...register(row.field, row.rules)} aria-invalid={Boolean(errors[row.field])} className="h-11 w-lg !bg-white rounded-sm border-slate-300 px-4 text-sm text-slate-900 shadow-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100" />
+                <Input id={row.id} {...register(row.field, row.rules)} aria-invalid={Boolean(errors[row.field])} className="h-11 w-lg !bg-white rounded-xl border-slate-300 px-4 text-sm text-slate-900 shadow-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100" />
                 {errors[row.field] && <p role="alert" className="mt-1 text-sm text-red-600">{errors[row.field]?.message}</p>}
               </div>
             </div>
@@ -204,17 +204,15 @@ export default function Page() {
           <div className="grid gap-3 py-3 sm:grid-cols-[190px_minmax(0,1fr)] sm:items-center">
             <span className="text-sm font-medium text-slate-800">비밀번호</span>
             <div>
-              <Button
+              <CustomButton
                 type="button"
-                variant="outline"
-                className="h-11 rounded-sm border-slate-400 px-6 text-sm font-medium text-slate-900 shadow-none hover:bg-[#2196F3] hover:text-white"
                 onClick={() => {
                   resetRecovery({ email: getValues("email") });
                   setShowRecoveryDialog(true);
                 }}
               >
                 비밀번호 변경
-              </Button>
+              </CustomButton>
             </div>
           </div>
 
@@ -229,7 +227,7 @@ export default function Page() {
                 {...register("phone", { validate: (value) => /^010\d{8}$/.test(value.replace(/\D/g, "")) || "010으로 시작하는 휴대폰 번호 11자리를 입력해 주세요." })}
                 aria-invalid={Boolean(errors.phone)}
                 autoComplete="tel"
-                className="h-11 w-lg !bg-white rounded-sm border-slate-300 px-4 text-sm text-slate-900 shadow-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100"
+                className="h-11 w-lg !bg-white rounded-xl border-slate-300 px-4 text-sm text-slate-900 shadow-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100"
               />
               {errors.phone && <p role="alert" className="text-sm text-red-600">{errors.phone.message}</p>}
             </div>
@@ -248,27 +246,23 @@ export default function Page() {
               {...register("email", { required: "이메일을 입력해 주세요.", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "올바른 이메일 주소를 입력해 주세요." } })}
               aria-invalid={Boolean(errors.email)}
               autoComplete="email"
-              className="h-11 w-lg !bg-white rounded-sm border-slate-300 px-4 text-sm text-slate-900 shadow-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100"
+              className="h-11 w-lg !bg-white rounded-xl border-slate-300 px-4 text-sm text-slate-900 shadow-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-100"
             />
             {errors.email && <p role="alert" className="text-sm text-red-600">{errors.email.message}</p>}
           </div>
         </div>
         <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-8">
-          <Button
+          <CustomButton
             type="button"
-            variant="outline"
-            className="h-11 rounded-sm border-slate-400 px-6 text-sm font-medium text-slate-900 shadow-none hover:bg-[#2196F3] hover:text-white"
             onClick={() => setShowDeleteDialog(true)}
           >
             회원탈퇴
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             type="submit"
-            variant="outline"
-            className="h-11 rounded-sm border-slate-400 px-6 text-sm font-medium text-slate-900 shadow-none hover:bg-[#2196F3] hover:text-white"
           >
             수정
-          </Button>
+          </CustomButton>
         </div>
         </form>
       </section>
@@ -284,10 +278,10 @@ export default function Page() {
             {editError && <p role="alert" className="mt-2 text-red-600">{editError}</p>}
           </div>
           <DialogFooter className="mt-2 border-t border-slate-200 pt-4">
-            <Button type="button" variant="outline" disabled={editSubmitting} onClick={() => setShowEditDialog(false)}>취소</Button>
-            <Button type="button" disabled={editSubmitting} onClick={() => { void handleSubmit(handleEditMember)(); }}>
+            <CustomButton type="button" disabled={editSubmitting} onClick={() => setShowEditDialog(false)}>취소</CustomButton>
+            <CustomButton type="button" disabled={editSubmitting} onClick={() => { void handleSubmit(handleEditMember)(); }}>
               {editSubmitting ? "저장 중…" : "확인"}
-            </Button>
+            </CustomButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -305,10 +299,10 @@ export default function Page() {
             {deleteError && <p role="alert" className="mt-2 text-red-600">{deleteError}</p>}
           </div>
           <DialogFooter className="mt-2 border-t border-slate-200 pt-4">
-            <Button type="button" variant="outline" disabled={deleteSubmitting} onClick={() => setShowDeleteDialog(false)}>취소</Button>
-            <Button type="button" disabled={deleteSubmitting} onClick={() => { void handleDeleteAccount(); }}>
+            <CustomButton type="button" disabled={deleteSubmitting} onClick={() => setShowDeleteDialog(false)}>취소</CustomButton>
+            <CustomButton type="button" disabled={deleteSubmitting} onClick={() => { void handleDeleteAccount(); }}>
               {deleteSubmitting ? "처리 중…" : "탈퇴"}
-            </Button>
+            </CustomButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -328,7 +322,7 @@ export default function Page() {
               <label className="block font-medium" htmlFor="recovery-email">이메일</label>
               <input
                 autoComplete="email"
-                className="h-10 w-[320px] rounded-lg border border-slate-200 px-3 outline-none focus:border-[#2196F3]"
+                className="h-11 w-[300px] rounded-xl border border-slate-200 px-3 outline-none focus:border-[#2196F3]"
                 id="recovery-email"
                 {...registerRecovery("email", { required: "이메일을 입력해 주세요.", pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "올바른 이메일 주소를 입력해 주세요." } })}
                 aria-invalid={Boolean(recoveryErrors.email)}
@@ -336,9 +330,9 @@ export default function Page() {
               />
               {recoveryErrors.email && <p role="alert" className="text-red-600">{recoveryErrors.email.message}</p>}
               {recoveryError && <p role="alert" className="text-red-600">{recoveryError}</p>}
-              <button className="rounded-lg bg-[#2196F3] ml-4 px-4 py-2 font-semibold text-white disabled:opacity-60" disabled={recoverySubmitting} type="submit">
+              <CustomButton className="ml-4 bg-[#2196F3] font-semibold text-white disabled:opacity-60" disabled={recoverySubmitting} type="submit">
                 {recoverySubmitting ? "전송 중…" : "메일 전송하기"}
-              </button>
+              </CustomButton>
             </form>
           )}
         />

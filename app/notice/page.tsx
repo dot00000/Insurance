@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import NoticeDialog from "@/components/common/NoticeDialog";
 import NoticeRegisterDialog from "@/components/common/NoticeRegisterDialog";
 import NoticeEditDialog from "@/components/common/NoticeEditDialog";
-import { Button } from "@/components/ui/button";
+import { CustomButton } from "@/components/common/CustomButton";
 import { getSupabaseClient } from "@/utils/supabase/client";
 
 const rowsPerPage = 10;
@@ -102,14 +102,12 @@ export default function Page() {
   return (
     <div className="space-y-4 p-6">
       {isLoggedIn && <div className="flex justify-end">
-        <Button
+        <CustomButton
           type="button"
-          variant="outline"
-          className="h-11 rounded-sm border-slate-400 px-6 text-sm font-medium text-slate-900 shadow-none hover:bg-[#2196F3] hover:text-white"
           onClick={() => setIsRegisterOpen(true)}
         >
           공지사항 등록
-        </Button>
+        </CustomButton>
       </div>}
       {listError && <p role="alert" className="text-sm text-red-600">{listError}</p>}
       <CommonTable

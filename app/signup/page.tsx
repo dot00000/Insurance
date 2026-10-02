@@ -117,7 +117,7 @@ export default function SignupPage() {
                         field.name === "password" ? `${field.name}-help` : "",
                       ].filter(Boolean).join(" ") || undefined}
                       autoComplete={field.autoComplete}
-                      className={`h-10 w-full rounded-[8px] border border-[#e8ebf0] bg-white/70 px-3 text-base text-[#202735] outline-none transition placeholder:text-[#a0a8b4] focus:border-[#7ea5f8] focus:ring-2 focus:ring-[#3569e8]/10 ${isPassword ? "pr-11" : ""}`}
+                      className={`h-10 w-full rounded-xl border border-[#e8ebf0] bg-white/70 px-3 text-base text-[#202735] outline-none transition placeholder:text-[#a0a8b4] focus:border-[#7ea5f8] focus:ring-2 focus:ring-[#3569e8]/10 ${isPassword ? "pr-11" : ""}`}
                       id={`signup-${field.name}`}
                       placeholder={field.label}
                       required
@@ -152,7 +152,7 @@ export default function SignupPage() {
 
           <button
             disabled={isSubmitting}
-            className="mt-10 h-12 w-full rounded-[8px] bg-[#2196F3] text-base font-bold text-white shadow-[0_1px_2px_rgba(30,70,170,0.2)] transition hover:bg-[#285bd4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3268e8]"
+            className="mt-10 h-12 w-full rounded-xl bg-[#2196F3] text-base font-bold text-white shadow-[0_1px_2px_rgba(30,70,170,0.2)] transition hover:bg-[#285bd4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3268e8]"
             type="submit"
           >
             {isSubmitting ? "가입 처리 중…" : "회원가입"}
