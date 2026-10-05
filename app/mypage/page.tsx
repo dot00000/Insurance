@@ -26,19 +26,17 @@ function formatPhone(value: string): string {
 
 export default function Page() {
   const router = useRouter();
-  const { register, handleSubmit, reset, getValues, formState: { errors, isSubmitting: editSubmitting } } = useForm<MemberValues>({
+  const { register, handleSubmit, reset, getValues, setError, clearErrors, formState: { errors, isSubmitting: editSubmitting } } = useForm<MemberValues>({
     defaultValues: { name: "", id: "", phone: "", email: "" },
     mode: "onTouched",
   });
-  const { register: registerRecovery, handleSubmit: submitRecovery, reset: resetRecovery, formState: { errors: recoveryErrors, isSubmitting: recoverySubmitting } } = useForm<RecoveryValues>({
+  const { register: registerRecovery, handleSubmit: submitRecovery, reset: resetRecovery, setError: setRecoveryError, clearErrors: clearRecoveryErrors, formState: { errors: recoveryErrors, isSubmitting: recoverySubmitting } } = useForm<RecoveryValues>({
     defaultValues: { email: "" },
   });
   const [memberError, setMemberError] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState<string | null>(null);
   const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
-  const [recoveryError, setRecoveryError] = useState<string | null>(null);
   const [recoverySent, setRecoverySent] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
@@ -79,12 +77,12 @@ export default function Page() {
     const nextId = values.id.trim();
     const nextEmail = values.email.trim();
     const digits = values.phone.replace(/\D/g, "");
-    setEditError(null);
+    clearErrors("root.server");
     try {
       const supabase = getSupabaseClient();
       const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
       if (userError || !currentUser) {
-        setEditError("로그인 후 다시 시도해 주세요.");
+        setError("root.server", { message: "로그인 후 다시 시도해 주세요." });
         return;
       }
 
@@ -94,13 +92,13 @@ export default function Page() {
         data: { name: nextName, id: nextId, phone: digits },
       });
       if (updateError) {
-        setEditError("회원 정보를 저장하지 못했습니다. 입력값을 확인하고 다시 시도해 주세요.");
+        setError("root.server", { message: "회원 정보를 저장하지 못했습니다. 입력값을 확인하고 다시 시도해 주세요." });
         return;
       }
 
       const { data: { user: savedUser }, error: reloadError } = await supabase.auth.getUser();
       if (reloadError || !savedUser) {
-        setEditError("저장했지만 회원 정보를 다시 불러오지 못했습니다. 새로고침해 주세요.");
+        setError("root.server", { message: "저장했지만 회원 정보를 다시 불러오지 못했습니다. 새로고침해 주세요." });
         return;
       }
       const savedInfo = {
@@ -114,25 +112,25 @@ export default function Page() {
         ? "회원 정보가 저장되었습니다. 새 이메일 주소의 인증 메일을 확인해 주세요."
         : "회원 정보가 저장되었습니다.");
     } catch {
-      setEditError("회원 정보 저장 요청을 처리하지 못했습니다. 다시 시도해 주세요.");
+      setError("root.server", { message: "회원 정보 저장 요청을 처리하지 못했습니다. 다시 시도해 주세요." });
     }
   }
 
   async function handleRecovery(values: RecoveryValues) {
     const recoveryEmail = values.email.trim();
-    setRecoveryError(null);
+    clearRecoveryErrors("root.server");
 
     try {
       const { error } = await getSupabaseClient().auth.resetPasswordForEmail(recoveryEmail, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) {
-        setRecoveryError("재설정 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        setRecoveryError("root.server", { message: "재설정 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요." });
         return;
       }
       setRecoverySent(true);
     } catch {
-      setRecoveryError("재설정 요청을 처리하지 못했습니다. 연결 상태를 확인해 주세요.");
+      setRecoveryError("root.server", { message: "재설정 요청을 처리하지 못했습니다. 연결 상태를 확인해 주세요." });
     }
   }
 
@@ -177,7 +175,7 @@ export default function Page() {
         {memberError && <p role="alert" className="py-3 text-sm text-red-600">{memberError}</p>}
         {editMessage && <p role="status" className="py-3 text-sm text-green-700">{editMessage}</p>}
 
-        <form noValidate onSubmit={handleSubmit(() => { setEditError(null); setShowEditDialog(true); })}>
+        <form noValidate onSubmit={handleSubmit(() => { clearErrors("root.server"); setShowEditDialog(true); })}>
           <div className="divide-y divide-slate-200">
           {([
             { label: "이름", field: "name", id: "member-name", rules: { validate: (value: string) => Boolean(value.trim()) || "이름을 입력해 주세요." } },
@@ -269,13 +267,13 @@ export default function Page() {
       <Dialog open={showEditDialog} onOpenChange={(open) => {
         if (editSubmitting) return;
         setShowEditDialog(open);
-        if (!open) setEditError(null);
+        if (!open) clearErrors("root.server");
       }}>
         <DialogContent className="sm:max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
           <DialogHeader><DialogTitle className="px-3 text-lg font-semibold text-slate-900">회원정보 수정</DialogTitle></DialogHeader>
           <div className="px-3 py-2 text-sm leading-6 text-slate-700">
             <p>회원 정보를 수정하시겠습니까?</p>
-            {editError && <p role="alert" className="mt-2 text-red-600">{editError}</p>}
+            {errors.root?.server && <p role="alert" className="mt-2 text-red-600">{errors.root.server.message}</p>}
           </div>
           <DialogFooter className="mt-2 border-t border-slate-200 pt-4">
             <CustomButton type="button" disabled={editSubmitting} onClick={() => setShowEditDialog(false)}>취소</CustomButton>
@@ -312,7 +310,7 @@ export default function Page() {
           description="가입한 이메일로 비밀번호 재설정 링크를 보내드립니다."
           onClose={() => {
             setShowRecoveryDialog(false);
-            setRecoveryError(null);
+            clearRecoveryErrors("root.server");
             setRecoverySent(false);
           }}
           content={recoverySent ? (
@@ -329,7 +327,7 @@ export default function Page() {
                 type="email"
               />
               {recoveryErrors.email && <p role="alert" className="text-red-600">{recoveryErrors.email.message}</p>}
-              {recoveryError && <p role="alert" className="text-red-600">{recoveryError}</p>}
+              {recoveryErrors.root?.server && <p role="alert" className="text-red-600">{recoveryErrors.root.server.message}</p>}
               <CustomButton className="ml-4 bg-[#2196F3] font-semibold text-white disabled:opacity-60" disabled={recoverySubmitting} type="submit">
                 {recoverySubmitting ? "전송 중…" : "메일 전송하기"}
               </CustomButton>

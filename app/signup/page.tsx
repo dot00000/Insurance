@@ -31,7 +31,7 @@ const signupResolver: Resolver<SignupValues> = (values) => {
 
 export default function SignupPage() {
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<SignupValues>({
+  const { register, handleSubmit, reset, setError, clearErrors, formState: { errors, isSubmitting } } = useForm<SignupValues>({
     resolver: signupResolver,
     mode: "onTouched",
     reValidateMode: "onChange",
@@ -40,7 +40,6 @@ export default function SignupPage() {
     },
   });
   const submitting = useRef(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
 
@@ -53,7 +52,7 @@ export default function SignupPage() {
 
         <form noValidate aria-busy={isSubmitting} onSubmit={(event) => handleSubmit(async (values) => {
           if (submitting.current) return;
-          setSubmitError(null);
+          clearErrors("root.server");
           setSuccessMessage(null);
           submitting.current = true;
           try {
@@ -75,7 +74,7 @@ export default function SignupPage() {
                 signup_disabled: "현재 회원가입을 이용할 수 없습니다.",
                 email_address_invalid: "가입 가능한 이메일 주소를 입력해 주세요.",
               };
-              setSubmitError(messages[error.code ?? ""] ?? "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+              setError("root.server", { message: messages[error.code ?? ""] ?? "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요." });
               return;
             }
 
@@ -85,14 +84,14 @@ export default function SignupPage() {
               ? "회원가입이 완료되었습니다."
               : "이메일의 가입 인증 안내를 확인해 주세요. 이미 가입했다면 로그인해 주세요.");
           } catch (error) {
-            setSubmitError(error instanceof Error && error.message.startsWith("회원가입 서비스 설정")
+            setError("root.server", { message: error instanceof Error && error.message.startsWith("회원가입 서비스 설정")
               ? error.message
-              : "회원가입 요청을 처리하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.");
+              : "회원가입 요청을 처리하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요." });
           } finally {
             submitting.current = false;
           }
         }, () => {
-          setSubmitError(null);
+          clearErrors("root.server");
           setSuccessMessage(null);
         })(event)}>
           <div className="space-y-3">
@@ -157,7 +156,7 @@ export default function SignupPage() {
           >
             {isSubmitting ? "가입 처리 중…" : "회원가입"}
           </button>
-          {submitError && <p role="alert" className="mt-3 text-sm text-red-600">{submitError}</p>}
+          {errors.root?.server && <p role="alert" className="mt-3 text-sm text-red-600">{errors.root.server.message}</p>}
           {successMessage && <p role="status" className="mt-3 text-sm text-[#21835a]">{successMessage}</p>}
         </form>
       </section>
