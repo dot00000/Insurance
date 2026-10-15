@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-type MemberValues = { name: string; id: string; phone: string; email: string };
+type MemberValues = { name: string; phone: string; email: string };
 type RecoveryValues = { email: string };
 
 function metadataString(value: unknown): string {
@@ -27,7 +27,7 @@ function formatPhone(value: string): string {
 export default function Page() {
   const router = useRouter();
   const { register, handleSubmit, reset, getValues, setError, clearErrors, formState: { errors, isSubmitting: editSubmitting } } = useForm<MemberValues>({
-    defaultValues: { name: "", id: "", phone: "", email: "" },
+    defaultValues: { name: "", phone: "", email: "" },
     mode: "onTouched",
   });
   const { register: registerRecovery, handleSubmit: submitRecovery, reset: resetRecovery, setError: setRecoveryError, clearErrors: clearRecoveryErrors, formState: { errors: recoveryErrors, isSubmitting: recoverySubmitting } } = useForm<RecoveryValues>({
@@ -58,7 +58,6 @@ export default function Page() {
         const userEmail = user.email ?? "";
         reset({
           name: metadataString(metadata?.name),
-          id: metadataString(metadata?.id) || userEmail,
           phone: formatPhone(metadataString(metadata?.phone)),
           email: userEmail,
         });
@@ -74,7 +73,6 @@ export default function Page() {
 
   async function handleEditMember(values: MemberValues) {
     const nextName = values.name.trim();
-    const nextId = values.id.trim();
     const nextEmail = values.email.trim();
     const digits = values.phone.replace(/\D/g, "");
     clearErrors("root.server");
@@ -89,7 +87,7 @@ export default function Page() {
       const emailChanged = nextEmail !== currentUser.email;
       const { error: updateError } = await supabase.auth.updateUser({
         ...(emailChanged ? { email: nextEmail } : {}),
-        data: { name: nextName, id: nextId, phone: digits },
+        data: { name: nextName, phone: digits },
       });
       if (updateError) {
         setError("root.server", { message: "회원 정보를 저장하지 못했습니다. 입력값을 확인하고 다시 시도해 주세요." });
@@ -103,7 +101,6 @@ export default function Page() {
       }
       const savedInfo = {
         name: metadataString(savedUser.user_metadata?.name),
-        id: metadataString(savedUser.user_metadata?.id) || savedUser.email || "",
         phone: formatPhone(metadataString(savedUser.user_metadata?.phone)),
       };
       reset({ ...savedInfo, email: savedUser.email ?? "" });
@@ -179,7 +176,6 @@ export default function Page() {
           <div className="divide-y divide-slate-200">
           {([
             { label: "이름", field: "name", id: "member-name", rules: { validate: (value: string) => Boolean(value.trim()) || "이름을 입력해 주세요." } },
-            { label: "아이디", field: "id", id: "member-id", rules: { validate: (value: string) => Boolean(value.trim()) || "아이디를 입력해 주세요." } },
           ] as const).map((row) => (
             <div
               key={row.id}

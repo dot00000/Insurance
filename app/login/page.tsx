@@ -1,12 +1,36 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useReducer, useRef, useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/utils/supabase/client";
 import CommonDialog from "@/components/common/CommonDialog";
 
 const rememberedEmailKey = "rememberedLoginEmail";
+
+type RecoveryState = {
+  submitting: boolean;
+  error: string | null;
+};
+
+type RecoveryAction =
+  | { type: "START" }
+  | { type: "ERROR"; message: string }
+  | { type: "FINISH" }
+  | { type: "CLEAR_ERROR" };
+
+function recoveryReducer(state: RecoveryState, action: RecoveryAction): RecoveryState {
+  switch (action.type) {
+    case "START":
+      return { submitting: true, error: null };
+    case "ERROR":
+      return { ...state, error: action.message };
+    case "FINISH":
+      return { ...state, submitting: false };
+    case "CLEAR_ERROR":
+      return { ...state, error: null };
+  }
+}
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,8 +39,10 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
-  const [recoverySubmitting, setRecoverySubmitting] = useState(false);
-  const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const [recoveryState, dispatchRecovery] = useReducer(recoveryReducer, {
+    submitting: false,
+    error: null,
+  });
   const [recoverySent, setRecoverySent] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const router = useRouter();
@@ -64,26 +90,31 @@ export default function LoginPage() {
 
   async function handleRecovery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (recoverySubmitting) return;
+    if (recoveryState.submitting) return;
 
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("recovery-email") ?? "").trim();
-    setRecoverySubmitting(true);
-    setRecoveryError(null);
+    dispatchRecovery({ type: "START" });
 
     try {
       const { error } = await getSupabaseClient().auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) {
-        setRecoveryError("재설정 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        dispatchRecovery({
+          type: "ERROR",
+          message: "재설정 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        });
         return;
       }
       setRecoverySent(true);
     } catch {
-      setRecoveryError("재설정 요청을 처리하지 못했습니다. 연결 상태를 확인해 주세요.");
+      dispatchRecovery({
+        type: "ERROR",
+        message: "재설정 요청을 처리하지 못했습니다. 연결 상태를 확인해 주세요.",
+      });
     } finally {
-      setRecoverySubmitting(false);
+      dispatchRecovery({ type: "FINISH" });
     }
   }
 
@@ -176,7 +207,7 @@ export default function LoginPage() {
           description="가입한 이메일로 비밀번호 재설정 링크를 보내드립니다."
           onClose={() => {
             setShowRecoveryDialog(false);
-            setRecoveryError(null);
+            dispatchRecovery({ type: "CLEAR_ERROR" });
             setRecoverySent(false);
           }}
           content={recoverySent ? (
@@ -193,9 +224,9 @@ export default function LoginPage() {
                 required
                 type="email"
               />
-              {recoveryError && <p role="alert" className="text-red-600">{recoveryError}</p>}
-              <button className="rounded-lg bg-[#2196F3] ml-4 px-4 py-2 font-semibold text-white disabled:opacity-60" disabled={recoverySubmitting} type="submit">
-                {recoverySubmitting ? "전송 중…" : "메일 전송하기"}
+              {recoveryState.error && <p role="alert" className="text-red-600">{recoveryState.error}</p>}
+              <button className="rounded-lg bg-[#2196F3] ml-4 px-4 py-2 font-semibold text-white disabled:opacity-60" disabled={recoveryState.submitting} type="submit">
+                {recoveryState.submitting ? "전송 중…" : "메일 전송하기"}
               </button>
             </form>
           )}
